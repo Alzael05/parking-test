@@ -27,7 +27,7 @@ router.post("/unpark", function (req, res, next) {
 
     SlotsController.unParkVehicle(req.body);
 
-    res.status(200).json(`${req.body.plateNumber} - Parked Successfully`)
+    res.status(200).json(`${req.body.plateNumber} - UnParked Successfully`)
   } catch (error) {
 
     res.status(500).json("Error 500")

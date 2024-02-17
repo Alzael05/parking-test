@@ -17,7 +17,7 @@ function DbLibrary() {
         CREATE TABLE slots (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           isAvailable BOOLEAN NOT NULL CHECK(isAvailable IN (0,1)),
-          size INTEGER CHECK(size IN (0,1,2)),
+          type INTEGER CHECK(type IN (0,1,2)),
           distanceFromEntryPoint TEXT
         )
         `,
@@ -32,43 +32,43 @@ function DbLibrary() {
 
       const parkingMap = [
         {
-          size: 0, // "S",
+          type: 0, // "S",
           distanceFromEntryPoint: [5, 10, 6],
         },
         {
-          size: 1, // "M",
+          type: 1, // "M",
           distanceFromEntryPoint: [4, 9, 7],
         },
         {
-          size: 2, // "L",
+          type: 2, // "L",
           distanceFromEntryPoint: [3, 8, 8],
         },
         {
-          size: 0, // "S",
+          type: 0, // "S",
           distanceFromEntryPoint: [2, 7, 9],
         },
         {
-          size: 1, // "M",
+          type: 1, // "M",
           distanceFromEntryPoint: [1, 6, 10],
         },
         {
-          size: 2, // "L",
+          type: 2, // "L",
           distanceFromEntryPoint: [6, 1, 5],
         },
         {
-          size: 0, // "S",
+          type: 0, // "S",
           distanceFromEntryPoint: [9, 4, 2],
         },
         {
-          size: 1, // "M",
+          type: 1, // "M",
           distanceFromEntryPoint: [8, 3, 3],
         },
         {
-          size: 2, // "L",
+          type: 2, // "L",
           distanceFromEntryPoint: [7, 2, 4],
         },
         {
-          size: 1, // "M",
+          type: 1, // "M",
           distanceFromEntryPoint: [10, 5, 1],
         },
         // Add more rows for additional slots
@@ -79,7 +79,7 @@ function DbLibrary() {
         slotsStatement.run(
           index + 1,
           1, // available
-          parkingMap[index].size,
+          parkingMap[index].type,
           JSON.stringify(parkingMap[index].distanceFromEntryPoint),
         );
       }
@@ -101,10 +101,10 @@ function DbLibrary() {
         CREATE TABLE vehicles (
           plateNumber TEXT NOT NULL,
           slotId INTEGER NOT NULL,
-          size INTEGER NOT NULL CHECK(size IN (0,1,2)),
+          type INTEGER NOT NULL CHECK(type IN (0,1,2)),
           entryDateTime TEXT NOT NULL,
           exitDateTime TEXT DEFAULT NULL,
-          paidAmount REAL DEFAULT NULL
+          paidFee REAL DEFAULT NULL
         )
         `,
         (err) => {
@@ -139,41 +139,47 @@ function DbLibrary() {
       const feesMap = [
         {
           feeName: "3HoursFlatRate",
-          vehicleType: [0,1,2],
+          slotType: [0, 1, 2],
+          isConditional: 0,
           hour: 3,
           fee: 40,
         },
         {
           feeName: "1HourSurchargeRateSP",
-          vehicleType: [0],
+          slotType: [0],
+          isConditional: 1,
           hour: 1,
           fee: 20,
         },
         {
           feeName: "1HourSurchargeRateMP",
-          vehicleType: [1],
+          slotType: [1],
+          isConditional: 1,
           hour: 1,
           fee: 60,
         },
         {
           feeName: "1HourSurchargeRateLP",
-          vehicleType: [2],
+          slotType: [2],
+          isConditional: 1,
           hour: 1,
           fee: 100,
         },
         {
           feeName: "24HoursSurchargeRate",
-          vehicleType: [0,1,2],
+          slotType: [0, 1, 2],
+          isConditional: 1,
           hour: 24,
           fee: 5000,
         },
       ];
-      const feesStatement = db.prepare(`INSERT INTO fees VALUES (?, ?, ?, ?)`);
+      const feesStatement = db.prepare(`INSERT INTO fees VALUES (?, ?, ?, ?, ?)`);
 
       for (let index = 0; index < feesMap.length; index++) {
         feesStatement.run(
           feesMap[index].feeName,
-          feesMap[index].vehicleType,
+          JSON.stringify(feesMap[index].slotType),
+          feesMap[index].isConditional,
           feesMap[index].hour,
           feesMap[index].fee,
         );

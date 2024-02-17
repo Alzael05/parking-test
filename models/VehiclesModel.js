@@ -1,13 +1,13 @@
 const DbService = require("../services/DbService");
 const dbInstance = DbService().getDBInstance().instance;
 
-async function insertParkedVehicle({ plateNumber, slotId, size, entryDate }) {
+async function insertParkedVehicle({ plateNumber, slotId, type, entryDateTime }) {
   const result = await new Promise(function (resolve, reject) {
     const vehicleStatement = dbInstance.prepare(
       `INSERT INTO vehicles VALUES (?, ?, ?, ?, ?, ?)`,
     );
 
-    vehicleStatement.run(plateNumber, slotId, size, entryDate, null, null);
+    vehicleStatement.run(plateNumber, slotId, type, entryDateTime, null, null);
 
     vehicleStatement.finalize((err) => {
       if (err) {
@@ -15,9 +15,10 @@ async function insertParkedVehicle({ plateNumber, slotId, size, entryDate }) {
 
         reject(err);
       }
+
       console.log("Data inserted into vehicles table.");
 
-      resolve({ plateNumber, slotId, size, entryDate });
+      resolve({ plateNumber, slotId, type, entryDateTime });
     });
   });
 
@@ -31,8 +32,22 @@ async function insertParkedVehicle({ plateNumber, slotId, size, entryDate }) {
 async function getParkedVehicleDetails(plateNumber) {
   const result = await new Promise(function (resolve, reject) {
     dbInstance.all(
-      `SELECT * FROM vehicles WHERE plateNumber = '${plateNumber}'`,
+      `
+      SELECT
+        plateNumber,
+        slotId,
+        type,
+        entryDateTime,
+        exitDateTime,
+        paidFee
+      FROM vehicles
+      WHERE plateNumber = '${plateNumber}'
+      ORDER BY entryDateTime DESC
+      LIMIT 1
+      `,
       function (err, rows) {
+        console.log("getParkedVehicleDetails", rows);
+
         if (err) {
           reject(err);
         }
@@ -42,21 +57,17 @@ async function getParkedVehicleDetails(plateNumber) {
     );
   });
 
-  dbInstance.each(`SELECT * FROM fees`, (err, row) => {
-    console.log(row);
-  });
-
   return result;
 }
 
-async function updateParkedVehicleExitDateTime(plateNumber, exitDate) {
+async function updateParkedVehicleExitDateTimeAndFee(plateNumber, parkingFee, exitDate) {
   const result = await new Promise(function (resolve, reject) {
     dbInstance.run(
-      "UPDATE vehicles SET exitDate = $exitDate WHERE plateNumber = $plateNumber",
-      {
-        $plateNumber: plateNumber,
-        $exitDate: exitDate,
-      },
+      `
+      UPDATE vehicles
+      SET exitDate = ${exitDate}, paidFee = ${parkingFee}
+      WHERE plateNumber = ${plateNumber}
+      `,
       function (result, err) {
         if (err) {
           reject(err);
@@ -76,5 +87,6 @@ async function updateParkedVehicleExitDateTime(plateNumber, exitDate) {
 
 module.exports = {
   insertParkedVehicle,
-  updateParkedVehicleExitDateTime,
+  getParkedVehicleDetails,
+  updateParkedVehicleExitDateTimeAndFee,
 };

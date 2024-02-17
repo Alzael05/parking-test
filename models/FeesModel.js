@@ -3,18 +3,28 @@ const dbInstance = DbService().getDBInstance().instance;
 
 async function getFees() {
   const result = await new Promise(function (resolve, reject) {
-    dbInstance.all(`SELECT * FROM fees`, function (err, rows) {
-      if (err) {
-        reject(err);
-      }
+    dbInstance.all(
+      `
+      SELECT
+        feeName,
+        vehicleType,
+        hour,
+        fee
+      FROM fees
+      `,
+      function (err, rows) {
+        if (err) {
+          reject(err);
+        }
 
-      resolve(rows);
-    });
+        resolve(rows);
+      },
+    );
   });
 
-  // dbInstance.each(`SELECT * FROM fees`, (err, row) => {
-  //   console.log(row);
-  // });
+  dbInstance.each(`SELECT * FROM fees`, (err, row) => {
+    console.log(row);
+  });
 
   return result;
 }
