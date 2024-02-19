@@ -100,7 +100,7 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
   } catch (error) {
     console.log(error);
 
-    return { status: 400, message: error };
+    return { status: 400, message: error.message };
   }
 }
 
@@ -156,7 +156,7 @@ async function unparkVehicle({ plateNumber }) {
   } catch (error) {
     console.log(error);
 
-    return { status: 400, message: error };
+    return { status: 400, message: error.message };
   }
 }
 
