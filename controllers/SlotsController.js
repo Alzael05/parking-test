@@ -12,25 +12,27 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
     const vehicleDetails = await await VehiclesModel.getParkedVehicleDetails(plateNumber);
 
     // Existing record return error already been parked
-    if (vehicleDetails[0].exitDateTime !== null && vehicleDetails[0].paidFee === null) {
-      throw new Error (`Vehicle with plate number ${plateNumber} is already parked.`)
+    if (vehicleDetails.length > 0) {
+      if (vehicleDetails[0].exitDateTime !== null) {
+        throw new Error(`Vehicle with plate number ${plateNumber} is already parked.`);
+      }
+
+      /**
+       * (c) A vehicle leaving the parking complex and returning within one hour must be charged continuous rate,
+       * i.e. the vehicle must be considered as if it did not leave. Otherwise, rates must be implemented as described.
+       */
+      // Continue parking if less than 1 hour
+      const leftParkingDuration = Math.ceil(
+        (Date.parse(currentDateTime) - Date.parse(vehicleDetails[0].entryDateTime)) /
+          (1000 * 60 * 60),
+      ); // in hours
+
+      if (leftParkingDuration <= 1) {
+        currentDateTime = vehicleDetails[0].entryDateTime;
+      }
+
+      console.log(`parkingDuration - ${leftParkingDuration}hrs`);
     }
-
-    /**
-     * (c) A vehicle leaving the parking complex and returning within one hour must be charged continuous rate,
-     * i.e. the vehicle must be considered as if it did not leave. Otherwise, rates must be implemented as described.
-     */
-    // Continue parking if less than 1 hour
-    const leftParkingDuration = Math.ceil(
-      (Date.parse(currentDateTime) - Date.parse(vehicleDetails[0].entryDateTime)) /
-        (1000 * 60 * 60),
-    ); // in hours
-
-    if (leftParkingDuration <= 1) {
-      currentDateTime = vehicleDetails[0].entryDateTime;
-    }
-
-    console.log(`parkingDuration - ${leftParkingDuration}hrs`);
 
     // Get Available Slot
     const types = {
@@ -93,7 +95,9 @@ async function unparkVehicle({ plateNumber }) {
     const vehicleDetails = await VehiclesModel.getParkedVehicleDetails(plateNumber);
     const slotDetails = await SlotsModel.getSlotDetails(vehicleDetails[0].slotId);
 
-    const exitDateTime = datetime.getCurrentTimecurrentDateTimee.log(vehicleDetails[0].exitDateTime);
+    const exitDateTime = datetime.getCurrentTimecurrentDateTimee.log(
+      vehicleDetails[0].exitDateTime,
+    );
     console.log(vehicleDetails[0].entryDate);
 
     console.log(Date.parse(exitDateTime));
