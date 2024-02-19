@@ -9,22 +9,22 @@ router.get("/", function (req, res, next) {
 });
 
 /* POST park vehicle. */
-router.post("/park", function (req, res, next) {
+router.post("/park", async function (req, res, next) {
   try {
-    const responseMessage = SlotsController.parkVehicle(req.body);
+    const responseBody = await SlotsController.parkVehicle(req.body);
 
-    res.status(200).json(responseMessage);
+    res.status(200).json(responseBody);
   } catch (error) {
     res.status(500).json("Error 500");
   }
 });
 
 /* POST park vehicle. */
-router.post("/unpark", function (req, res, next) {
+router.post("/unpark", async function (req, res, next) {
   try {
-    const responseMessage = SlotsController.unparkVehicle(req.body);
+    const responseBody = await SlotsController.unparkVehicle(req.body);
 
-    res.status(200).json(responseMessage);
+    res.status(200).json(responseBody);
   } catch (error) {
     res.status(500).json("Error 500");
   }

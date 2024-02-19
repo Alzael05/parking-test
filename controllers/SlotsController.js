@@ -93,11 +93,14 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
       `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`,
     );
 
-    return `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`;
+    return {
+      status: 200,
+      message: `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`,
+    };
   } catch (error) {
     console.log(error);
 
-    return error;
+    return { status: 400, message: error };
   }
 }
 
@@ -146,11 +149,14 @@ async function unparkVehicle({ plateNumber }) {
       `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`,
     );
 
-    return `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`;
+    return {
+      status: 200,
+      message: `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`,
+    };
   } catch (error) {
     console.log(error);
 
-    return error;
+    return { status: 400, message: error };
   }
 }
 
