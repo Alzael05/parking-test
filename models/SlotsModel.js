@@ -24,6 +24,8 @@ async function getAvailableSlotsByType(vehicleType) {
     );
   });
 
+  console.log("getAvailableSlotsByType");
+
   dbInstance.each(`SELECT * FROM slots`, (err, row) => {
     console.log(row);
   });
@@ -40,7 +42,7 @@ async function getSlotDetails(slotId) {
         isAvailable,
         type,
         distanceFromEntryPoint
-      FROM vehicles
+      FROM slots
       WHERE id = '${slotId}'
       `,
       function (err, rows) {
@@ -55,7 +57,7 @@ async function getSlotDetails(slotId) {
     );
   });
 
-  dbInstance.each(`SELECT * FROM vehicles`, (err, row) => {
+  dbInstance.each(`SELECT * FROM slots`, (err, row) => {
     console.log(row);
   });
 
@@ -75,6 +77,8 @@ async function updateSlotAvailability(slotId, isAvailable) {
       },
     );
   });
+
+  console.log("updateSlotAvailability");
 
   dbInstance.each(`SELECT * FROM slots`, (err, row) => {
     console.log(row);

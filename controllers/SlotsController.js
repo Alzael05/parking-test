@@ -65,14 +65,29 @@ async function unparkVehicle({ plateNumber }) {
   try {
     // const feesMatrix = await FeesModel.getFees();
     const vehicleDetails = await VehiclesModel.getParkedVehicleDetails(plateNumber);
-    const slotDetails = await SlotsModel.getSlotDetails(vehicleDetails.slotId);
+    const slotDetails = await SlotsModel.getSlotDetails(vehicleDetails[0].slotId);
+
+    const exitDateTime = datetime.getCurrentTime();
+
+    console.log(vehicleDetails[0].exitDateTime);
+    console.log(vehicleDetails[0].entryDate);
+
+    console.log(Date.parse(exitDateTime));
+    console.log(Date.parse(vehicleDetails[0].entryDateTime));
+
+    console.log(Date.parse(exitDateTime) - Date.parse(vehicleDetails[0].entryDateTime));
+    console.log(
+      (Date.parse(exitDateTime) - Date.parse(vehicleDetails[0].entryDateTime)) /
+        (1000 * 60 * 60),
+    );
 
     // Calculate parking fee
     const parkingDuration = Math.ceil(
-      (Date.parse(vehicleDetails.exitDateTime) -
-        Date.parse(vehicleDetails.entryDateTime)) /
+      (Date.parse(exitDateTime) - Date.parse(vehicleDetails[0].entryDateTime)) /
         (1000 * 60 * 60),
     ); // in hours
+
+    console.log(`parkingDuration - ${parkingDuration}hrs`);
 
     /* for (let index = 0; index < feesMatrix.length; index++) {
       const feeDetails = feesMatrix[index];
@@ -88,22 +103,20 @@ async function unparkVehicle({ plateNumber }) {
       }
     } */
 
-    const parkingFee = calculateParkingFee(slotDetails.type, parkingDuration);
-
-    vehicleDetails.paidFee;
-
-    const exitDateTime = datetime.getCurrentTime();
+    const parkingFee = calculateParkingFee(slotDetails[0].type, parkingDuration);
 
     await VehiclesModel.updateParkedVehicleExitDateTimeAndFee(
-      vehicleDetails.plateNumber,
+      vehicleDetails[0].plateNumber,
       parkingFee,
       exitDateTime,
     );
 
     // Update Slot Availability
-    await SlotsModel.updateSlotAvailability(vehicleDetails.slotId, 1);
+    await SlotsModel.updateSlotAvailability(vehicleDetails[0].slotId, 1);
 
-    console.log(`Vehicle unparked from slot ${slot}. Parking fee: ${parkingFee} pesos`);
+    console.log(
+      `Vehicle unparked from slot ${slotDetails[0].id}. Parking fee: ${parkingFee} pesos`,
+    );
 
     return parkingFee;
   } catch (error) {

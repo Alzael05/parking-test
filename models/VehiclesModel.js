@@ -22,6 +22,8 @@ async function insertParkedVehicle({ plateNumber, slotId, type, entryDateTime })
     });
   });
 
+  console.log("insertParkedVehicle");
+
   dbInstance.each(`SELECT * FROM vehicles`, (err, row) => {
     console.log(row);
   });
@@ -77,6 +79,8 @@ async function updateParkedVehicleExitDateTimeAndFee(plateNumber, parkingFee, ex
       },
     );
   });
+
+  console.log("updateParkedVehicleExitDateTimeAndFee");
 
   dbInstance.each(`SELECT * FROM vehicles`, (err, row) => {
     console.log(row);

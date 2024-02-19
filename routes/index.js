@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const SlotsController = require("../controllers/SlotsController")();
+const SlotsController = require("../controllers/SlotsController");
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -25,7 +25,7 @@ router.post("/park", function (req, res, next) {
 router.post("/unpark", function (req, res, next) {
   try {
 
-    SlotsController.unParkVehicle(req.body);
+    SlotsController.unparkVehicle(req.body);
 
     res.status(200).json(`${req.body.plateNumber} - UnParked Successfully`)
   } catch (error) {

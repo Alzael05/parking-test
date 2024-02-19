@@ -122,6 +122,7 @@ function DbLibrary() {
         CREATE TABLE fees (
           name TEXT,
           vehicleType TEXT,
+          isConditional BOOLEAN NOT NULL CHECK(isConditional IN (0,1)),
           hour INTEGER,
           fee REAL
         )

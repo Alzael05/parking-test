@@ -13,6 +13,8 @@ async function getFees() {
       FROM fees
       `,
       function (err, rows) {
+        console.log("getFees", rows);
+
         if (err) {
           reject(err);
         }
@@ -20,10 +22,6 @@ async function getFees() {
         resolve(rows);
       },
     );
-  });
-
-  dbInstance.each(`SELECT * FROM fees`, (err, row) => {
-    console.log(row);
   });
 
   return result;
