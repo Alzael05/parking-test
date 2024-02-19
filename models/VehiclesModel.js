@@ -70,13 +70,18 @@ async function getParkedVehicleDetails(plateNumber) {
   return result;
 }
 
-async function updateParkedVehicleExitDateTimeAndFee(plateNumber, parkingFee, exitDate) {
+async function updateParkedVehicleExitDateTimeAndFee(
+  id,
+  plateNumber,
+  parkingFee,
+  exitDate,
+) {
   const result = await new Promise(function (resolve, reject) {
     dbInstance.run(
       `
       UPDATE vehicles
       SET exitDateTime = '${exitDate}', paidFee = '${parkingFee}'
-      WHERE plateNumber = '${plateNumber}'
+      WHERE id = '${id}' AND plateNumber = '${plateNumber}'
       `,
       function (result, err) {
         console.debug("updateParkedVehicleExitDateTimeAndFee", result, err);

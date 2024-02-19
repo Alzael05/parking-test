@@ -52,8 +52,8 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
 
     const availableSlots = await SlotsModel.getAvailableSlotsByType(type);
 
-    console.log("entryPoint", entryPoint);
-    console.log("availableSlots", availableSlots);
+    console.debug("entryPoint", entryPoint);
+    console.debug("availableSlots", availableSlots);
 
     let slotFromEntryPoint = {};
 
@@ -89,7 +89,7 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
     // Update Slot Availability
     await SlotsModel.updateSlotAvailability(nearestSlotFromEntryPoint.id, 0);
 
-    console.log(
+    console.info(
       `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`,
     );
 
@@ -98,7 +98,7 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
       message: `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`,
     };
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return { status: 400, message: error.message };
   }
@@ -123,7 +123,8 @@ async function unparkVehicle({ plateNumber }) {
         (1000 * 60 * 60),
     ); // in hours
 
-    console.log(`parkingDuration - ${parkingDuration}hrs`);
+    console.debug(`exitDateTime`, `${exitDateTime}`);
+    console.debug(`parkingDuration`, `${parkingDuration}hrs`);
 
     /* for (let index = 0; index < feesMatrix.length; index++) {
       const feeDetails = feesMatrix[index];
@@ -142,6 +143,7 @@ async function unparkVehicle({ plateNumber }) {
     const parkingFee = calculateParkingFee(slotDetails[0].type, parkingDuration);
 
     await VehiclesModel.updateParkedVehicleExitDateTimeAndFee(
+      vehicleDetails[0].id,
       vehicleDetails[0].plateNumber,
       parkingFee,
       exitDateTime,
@@ -150,7 +152,7 @@ async function unparkVehicle({ plateNumber }) {
     // Update Slot Availability
     await SlotsModel.updateSlotAvailability(vehicleDetails[0].slotId, 1);
 
-    console.log(
+    console.info(
       `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`,
     );
 
@@ -159,7 +161,7 @@ async function unparkVehicle({ plateNumber }) {
       message: `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`,
     };
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return { status: 400, message: error.message };
   }
