@@ -6,7 +6,7 @@ const VehiclesModel = require("../models/VehiclesModel");
 
 async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
   try {
-    const currentDateTime = datetime.getCurrentTime();
+    let currentDateTime = datetime.getCurrentTime();
 
     // Validate Vehicle Plate
     const vehicleDetails = await await VehiclesModel.getParkedVehicleDetails(plateNumber);
