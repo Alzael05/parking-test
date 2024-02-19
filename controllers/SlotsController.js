@@ -9,7 +9,7 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
     let currentDateTime = datetime.getCurrentTime();
 
     // Validate Vehicle Plate
-    const vehicleDetails = await await VehiclesModel.getParkedVehicleDetails(plateNumber);
+    const vehicleDetails = await VehiclesModel.getParkedVehicleDetails(plateNumber);
 
     // Existing record return error already been parked
     if (vehicleDetails.length > 0) {
@@ -35,6 +35,13 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
     }
 
     // Get Available Slot
+    /**
+     * 2. There are three types of vehicles: small (S), medium (M) and large (L),
+     *  and there are three types or parking slots: small (SP), medium (MP) and large (LP).
+     *  (a) S vehicles can park in SP, MP and LP parking spaces;
+     *  (b) M vehicles can park in MP and LP parking spaces; and
+     *  (c) L vehicles can park only in LP parking spaces.
+     */
     const types = {
       S: 0,
       M: 1,
@@ -45,7 +52,8 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
 
     const availableSlots = await SlotsModel.getAvailableSlotsByType(type);
 
-    console.log("availableSlots", availableSlots, entryPoint);
+    console.log("entryPoint", entryPoint);
+    console.log("availableSlots", availableSlots);
 
     let slotFromEntryPoint = {};
 
@@ -81,11 +89,15 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
     // Update Slot Availability
     await SlotsModel.updateSlotAvailability(nearestSlotFromEntryPoint.id, 0);
 
-    return nearestSlotFromEntryPoint;
+    console.log(
+      `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`,
+    );
+
+    return `Vehicle ( ${plateNumber} ) is assigned to slot ${nearestSlotFromEntryPoint.id}. Entry date and time: ${currentDateTime}`;
   } catch (error) {
     console.log(error);
 
-    return null;
+    return error;
   }
 }
 
@@ -95,19 +107,7 @@ async function unparkVehicle({ plateNumber }) {
     const vehicleDetails = await VehiclesModel.getParkedVehicleDetails(plateNumber);
     const slotDetails = await SlotsModel.getSlotDetails(vehicleDetails[0].slotId);
 
-    const exitDateTime = datetime.getCurrentTimecurrentDateTimee.log(
-      vehicleDetails[0].exitDateTime,
-    );
-    console.log(vehicleDetails[0].entryDate);
-
-    console.log(Date.parse(exitDateTime));
-    console.log(Date.parse(vehicleDetails[0].entryDateTime));
-
-    console.log(Date.parse(exitDateTime) - Date.parse(vehicleDetails[0].entryDateTime));
-    console.log(
-      (Date.parse(exitDateTime) - Date.parse(vehicleDetails[0].entryDateTime)) /
-        (1000 * 60 * 60),
-    );
+    const exitDateTime = datetime.getCurrentTime();
 
     // Calculate parking fee
     const parkingDuration = Math.ceil(
@@ -143,17 +143,31 @@ async function unparkVehicle({ plateNumber }) {
     await SlotsModel.updateSlotAvailability(vehicleDetails[0].slotId, 1);
 
     console.log(
-      `Vehicle unparked from slot ${slotDetails[0].id}. Parking fee: ${parkingFee} pesos`,
+      `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`,
     );
 
-    return parkingFee;
+    return `Vehicle ( ${vehicleDetails[0].plateNumber} ) from slot ${slotDetails[0].id} left the parking complex. Parking fee: ${parkingFee} pesos. Exit date and time: ${exitDateTime}`;
   } catch (error) {
     console.log(error);
 
-    return null;
+    return error;
   }
 }
 
+/**
+ * (a) All types of car pay the flat rate of 40 pesos for the first three (3) hours;
+ * (b) The exceeding hourly rate beyond the initial three (3) hours will be charged as follows:
+ *  - 20/hour for vehicles parked in SP;
+ *  - 60/hour for vehicles parked in MP; and
+ *  - 100/hour for vehicles parked in LP
+ *
+ *  Take note that exceeding hours are charged depending on parking slot size regardless of vehicle size.
+ *
+ *  For parking that exceeds 24 hours, every full 24 hour chunk is charged 5,000 pesos regardless of parking slot.
+ *  The remainder hours are charged using the method explained in (b).
+ *
+ *  Parking fees are calculated using rounding up method, e.g. 6.5 hours must be rounded to 7.
+ */
 function calculateParkingFee(vehicleType, duration) {
   const baseRate = 40;
   let hourlyRate;
