@@ -13,7 +13,7 @@ async function getAvailableSlotsByType(vehicleType) {
       FROM slots WHERE isAvailable = 1 AND type >= ${vehicleType}
       `,
       function (err, rows) {
-        console.log("getAvailableSlotsByType", rows);
+        console.debug("getAvailableSlotsByType", err, rows);
 
         if (err) {
           reject(err);
@@ -24,10 +24,11 @@ async function getAvailableSlotsByType(vehicleType) {
     );
   });
 
-  console.log("getAvailableSlotsByType");
+  // DEBUG
+  dbInstance.all(`SELECT * FROM slots`, (err, rows) => {
+    console.debug("getAvailableSlotsByType");
 
-  dbInstance.each(`SELECT * FROM slots`, (err, row) => {
-    console.log(row);
+    console.debug(err, rows);
   });
 
   return result;
@@ -46,7 +47,7 @@ async function getSlotDetails(slotId) {
       WHERE id = '${slotId}'
       `,
       function (err, rows) {
-        console.log("getSlotDetails", rows);
+        console.debug("getSlotDetails", err, rows);
 
         if (err) {
           reject(err);
@@ -57,10 +58,6 @@ async function getSlotDetails(slotId) {
     );
   });
 
-  dbInstance.each(`SELECT * FROM slots`, (err, row) => {
-    console.log(row);
-  });
-
   return result;
 }
 
@@ -69,6 +66,8 @@ async function updateSlotAvailability(slotId, isAvailable) {
     dbInstance.run(
       `UPDATE slots SET isAvailable = ${isAvailable} WHERE id = ${slotId}`,
       function (result, err) {
+        console.debug("updateSlotAvailability", result, err);
+
         if (err) {
           reject(err);
         }
@@ -78,10 +77,11 @@ async function updateSlotAvailability(slotId, isAvailable) {
     );
   });
 
-  console.log("updateSlotAvailability");
+  // DEBUG
+  dbInstance.all(`SELECT * FROM slots`, (err, rows) => {
+    console.debug("updateSlotAvailability");
 
-  dbInstance.each(`SELECT * FROM slots`, (err, row) => {
-    console.log(row);
+    console.debug(err, rows);
   });
 
   return result;

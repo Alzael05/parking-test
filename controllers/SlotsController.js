@@ -108,6 +108,11 @@ async function unparkVehicle({ plateNumber }) {
   try {
     // const feesMatrix = await FeesModel.getFees();
     const vehicleDetails = await VehiclesModel.getParkedVehicleDetails(plateNumber);
+
+    if (vehicleDetails.length === 0 || vehicleDetails[0].exitDateTime !== null) {
+      throw new Error(`Vehicle with plate number ${plateNumber} is not parked.`);
+    }
+
     const slotDetails = await SlotsModel.getSlotDetails(vehicleDetails[0].slotId);
 
     const exitDateTime = datetime.getCurrentTime();
@@ -175,7 +180,7 @@ async function unparkVehicle({ plateNumber }) {
  *  Parking fees are calculated using rounding up method, e.g. 6.5 hours must be rounded to 7.
  */
 function calculateParkingFee(vehicleType, duration) {
-  const baseRate = 40;
+  const threeHoursFlatRate = 40;
   let hourlyRate;
 
   switch (vehicleType) {
@@ -202,7 +207,7 @@ function calculateParkingFee(vehicleType, duration) {
     return fullDayFee + hourlyFee;
   }
 
-  return baseRate + hourlyFee;
+  return threeHoursFlatRate + hourlyFee;
 }
 
 module.exports = {

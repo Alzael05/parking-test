@@ -99,6 +99,7 @@ function DbLibrary() {
       db.run(
         `
         CREATE TABLE vehicles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
           plateNumber TEXT NOT NULL,
           slotId INTEGER NOT NULL,
           type INTEGER NOT NULL CHECK(type IN (0,1,2)),

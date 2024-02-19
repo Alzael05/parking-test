@@ -4,10 +4,18 @@ const dbInstance = DbService().getDBInstance().instance;
 async function insertParkedVehicle({ plateNumber, slotId, type, entryDateTime }) {
   const result = await new Promise(function (resolve, reject) {
     const vehicleStatement = dbInstance.prepare(
-      `INSERT INTO vehicles VALUES (?, ?, ?, ?, ?, ?)`,
+      `
+      INSERT INTO vehicles (
+        plateNumber,
+        slotId,
+        type,
+        entryDateTime
+      )
+      VALUES (?, ?, ?, ?)
+      `,
     );
 
-    vehicleStatement.run(plateNumber, slotId, type, entryDateTime, null, null);
+    vehicleStatement.run(plateNumber, slotId, type, entryDateTime);
 
     vehicleStatement.finalize((err) => {
       if (err) {
@@ -22,10 +30,10 @@ async function insertParkedVehicle({ plateNumber, slotId, type, entryDateTime })
     });
   });
 
-  console.log("insertParkedVehicle");
+  dbInstance.all(`SELECT * FROM vehicles`, (err, rows) => {
+    console.debug("insertParkedVehicle");
 
-  dbInstance.each(`SELECT * FROM vehicles`, (err, row) => {
-    console.log(row);
+    console.debug(err, rows);
   });
 
   return result;
@@ -36,6 +44,7 @@ async function getParkedVehicleDetails(plateNumber) {
     dbInstance.all(
       `
       SELECT
+        id,
         plateNumber,
         slotId,
         type,
@@ -44,10 +53,10 @@ async function getParkedVehicleDetails(plateNumber) {
         paidFee
       FROM vehicles
       WHERE plateNumber = '${plateNumber}'
-      ORDER BY entryDateTime DESC
+      ORDER BY id DESC, entryDateTime DESC
       `,
       function (err, rows) {
-        console.log("getParkedVehicleDetails", rows);
+        console.debug("getParkedVehicleDetails", err, rows);
 
         if (err) {
           reject(err);
@@ -66,10 +75,12 @@ async function updateParkedVehicleExitDateTimeAndFee(plateNumber, parkingFee, ex
     dbInstance.run(
       `
       UPDATE vehicles
-      SET exitDate = ${exitDate}, paidFee = ${parkingFee}
-      WHERE plateNumber = ${plateNumber}
+      SET exitDateTime = '${exitDate}', paidFee = '${parkingFee}'
+      WHERE plateNumber = '${plateNumber}'
       `,
       function (result, err) {
+        console.debug("updateParkedVehicleExitDateTimeAndFee", result, err);
+
         if (err) {
           reject(err);
         }
@@ -79,10 +90,10 @@ async function updateParkedVehicleExitDateTimeAndFee(plateNumber, parkingFee, ex
     );
   });
 
-  console.log("updateParkedVehicleExitDateTimeAndFee");
+  dbInstance.all(`SELECT * FROM vehicles`, (err, rows) => {
+    console.debug("updateParkedVehicleExitDateTimeAndFee");
 
-  dbInstance.each(`SELECT * FROM vehicles`, (err, row) => {
-    console.log(row);
+    console.debug(err, rows);
   });
 
   return result;
