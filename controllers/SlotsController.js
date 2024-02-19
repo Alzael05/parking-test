@@ -13,7 +13,7 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
 
     // Existing record return error already been parked
     if (vehicleDetails.length > 0) {
-      if (vehicleDetails[0].exitDateTime !== null) {
+      if (vehicleDetails[0].exitDateTime === null) {
         throw new Error(`Vehicle with plate number ${plateNumber} is already parked.`);
       }
 
@@ -23,7 +23,7 @@ async function parkVehicle({ plateNumber, vehicleType, entryPoint }) {
        */
       // Continue parking if less than 1 hour
       const leftParkingDuration = Math.ceil(
-        (Date.parse(currentDateTime) - Date.parse(vehicleDetails[0].entryDateTime)) /
+        (Date.parse(currentDateTime) - Date.parse(vehicleDetails[0].exitDateTime)) /
           (1000 * 60 * 60),
       ); // in hours
 
