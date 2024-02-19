@@ -45,7 +45,6 @@ async function getParkedVehicleDetails(plateNumber) {
       FROM vehicles
       WHERE plateNumber = '${plateNumber}'
       ORDER BY entryDateTime DESC
-      LIMIT 1
       `,
       function (err, rows) {
         console.log("getParkedVehicleDetails", rows);
